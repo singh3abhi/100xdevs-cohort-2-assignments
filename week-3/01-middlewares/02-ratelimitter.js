@@ -11,10 +11,30 @@ const app = express();
 // You have been given a numberOfRequestsForUser object to start off with which
 // clears every one second
 
+
+
 let numberOfRequestsForUser = {};
 setInterval(() => {
     numberOfRequestsForUser = {};
 }, 1000)
+
+
+app.use(function(req,res,next) {
+  const userId = req.headers['user-id'];
+
+  if(!numberOfRequestsForUser[userId]){
+    numberOfRequestsForUser[userId] = 1;
+    return next();
+  }
+
+  numberOfRequestsForUser[userId]++;
+
+  if(numberOfRequestsForUser[userId] > 5){
+    return res.status(404).json({
+      message: "You have exceeded the limit of requests, please try again after a second",
+    })
+  }
+})
 
 app.get('/user', function(req, res) {
   res.status(200).json({ name: 'john' });
